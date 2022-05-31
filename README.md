@@ -1,7 +1,13 @@
 # Scratchify
 Scratchify is a streaming service coded in Scratch 3.0!
+
+
 Logo credited to M.D. on the Meower Media Co. Discord
+
+
 Thanks to water/bred on the Meower Media Co. Discord
+
+
 Thanks to Tnix on the Meower Media Co. Discord
 
 DISCLAIMER:
