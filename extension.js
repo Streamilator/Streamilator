@@ -1,4 +1,4 @@
-// Scratchify Extension v1.2
+// Scratchify Extension v1.1
 // https://github.com/underfanreal/Scratchify
 class ScratchifyExtension {
     constructor (runtime, extensionId) {
@@ -122,22 +122,22 @@ class ScratchifyExtension {
 
 	playAudioFromURL({URL}) {
 		this.audio_player = new Audio(URL);
-		return this.audio_player.play();
+		this.audio_player.play();
 		this.audio_player.volume = this.set_volume
 		this.end_hat = 1;
 	};
 
 	stopAudio({}) {
-		return this.audio_player.pause();
+		this.audio_player.pause();
 		this.audio_player.currentTime = 0;
 	};
 
 	pauseAudio({}) {
-		return this.audio_player.pause();
+		this.audio_player.pause();
 	};
 
 	resumeAudio({}) {
-		return this.audio_player.play();
+		this.audio_player.play();
 	};
 
 	goToLocation({LOCATION}) {
@@ -160,7 +160,7 @@ class ScratchifyExtension {
 	};
 
 	audioLocation({}) {
-		return this.audio_player.currentTime;
+		this.audio_player.currentTime;
 	};
 
 	audioDuration({}) {
