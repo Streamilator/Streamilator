@@ -8,7 +8,7 @@ Under this license:
 * You are free to change, remove, or modify the above copyright notice.
 * You are free to use the software in private or commercial forms.
 * You are free to use, copy, modify, and/or distribute the software for any purpose.
-* You are free to distribute this software with or without fee.
+* You are free to distribute this software without fee.
 * Absolutely no patent use is permitted.
 
 With the above conditions, the author(s) of this software do NOT gurantee warranty. As part of this license, under no circumstance
