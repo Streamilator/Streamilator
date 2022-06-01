@@ -1,1 +1,10 @@
-0.0.5
+{
+   "clientVersion": "0.0.5",
+   "extensionVersion": "1.1",
+   "changelog": [
+      "Version 0.0.5 Changelog",
+      "",
+      "The GUI now scales when the song list is hidden."
+   ],
+   "changelogRows": 3
+}
