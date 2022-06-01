@@ -1,9 +1,0 @@
- The BANGER License
-1. Do not use our epic catchphrase without permission.
-2. You may modify Scratchify in any way, and release it, HOWEVER:
-You must credit everyone involved with Scratchify at that time.
-You must not use Scratchify branding in a way that would confuse the downloader.
-E.X.  Official: Scratchify.  Your version: Scratchify Official, etc.
-3. You must not release your fork/version outside Github without WRITTEN permission.
-4. We may request you change your fork/versions branding in any way we see fit.
-5. You may not do the dab ever again.
