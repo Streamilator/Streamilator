@@ -16,7 +16,7 @@ class ScratchifyExtension {
 				{
                 	"opcode": 'playAudioFromURL',
                     "blockType": "command",
-                    "text": 'Play audio [URL]',
+                    "text": 'play audio [URL]',
 					"arguments": {
 						"URL": {
 							"type": "string",
@@ -27,19 +27,42 @@ class ScratchifyExtension {
 				{
                 	"opcode": 'stopAudio',
                     "blockType": "command",
-                    "text": 'Stop audio',
+                    "text": 'stop audio',
 					"arguments": {},
+                },
+				{
+                	"opcode": 'pauseAudio',
+                    "blockType": "command",
+                    "text": 'pause',
+					"arguments": {},
+                },
+				{
+                	"opcode": 'resumeAudio',
+                    "blockType": "command",
+                    "text": 'resume',
+					"arguments": {},
+                },
+				{
+			"opcode": 'goToLocation',
+                    "blockType": "command",
+                    "text": 'go to location [LOCATION]',
+					"arguments": {
+						"LOCATION": {
+							"type": "number",
+							"defaultValue": '0',
+						},
+					},
                 },
 		    		{
                 	"opcode": 'enableLoop',
                     "blockType": "command",
-                    "text": 'Turn loop on',
+                    "text": 'turn loop on',
 					"arguments": {},
                 },
 		    		{
                 	"opcode": 'disableLoop',
                     "blockType": "command",
-                    "text": 'Turn loop off',
+                    "text": 'turn loop off',
 					"arguments": {},
                 },
 		    
@@ -55,6 +78,18 @@ class ScratchifyExtension {
 	stopAudio({}) {
 		this.audio_player.pause();
 		this.audio_player.currentTime = 0;
+	};
+
+	pauseAudio({}) {
+		this.audio_player.pause();
+	};
+
+	resumeAudio({}) {
+		this.audio_player.play();
+	};
+
+	goToLocation({LOCATION}) {
+		this.audio_player.currentTime = LOCATION;
 	};
 	
 	enableLoop({}) {
