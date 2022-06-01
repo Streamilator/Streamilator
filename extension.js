@@ -28,16 +28,19 @@ class ScratchifyExtension {
                 	"opcode": 'stopAudio',
                     "blockType": "command",
                     "text": 'stop audio',
+					"arguments": {},
                 },
 				{
                 	"opcode": 'pauseAudio',
                     "blockType": "command",
                     "text": 'pause',
+					"arguments": {},
                 },
 				{
                 	"opcode": 'resumeAudio',
                     "blockType": "command",
                     "text": 'resume',
+					"arguments": {},
                 },
 				{
 			"opcode": 'goToLocation',
@@ -50,41 +53,24 @@ class ScratchifyExtension {
 						},
 					},
                 },
-				{
+		    		{
                 	"opcode": 'enableLoop',
                     "blockType": "command",
                     "text": 'turn loop on',
+					"arguments": {},
                 },
 		    		{
                 	"opcode": 'disableLoop',
                     "blockType": "command",
                     "text": 'turn loop off',
+					"arguments": {},
                 },
-		    		{
-                	"opcode": 'audioLocation',
-                    "blockType": "reporter",
-                    "text": 'audio location',
-                },
-		    		{
-                	"opcode": 'audioDuration',
-                    "blockType": "reporter",
-                    "text": 'audio duration',
-                },
-		    		{
-                	"opcode": 'audioPaused',
-                    "blockType": "Boolean",
-                    "text": 'audio paused?',
-                },
-		    		{
-                	"opcode": 'audioEnded',
-                    "blockType": "Boolean",
-                    "text": 'audio ended?',
-                },
-		    		{
-                	"opcode": 'loopEnabled',
-                    "blockType": "Boolean",
-                    "text": 'loop enabled?',
-                },
+					{
+					"opcode": 'location',
+					"blockType": "reporter",
+					"text": 'location',
+					"arguments": {},
+				},
 			]
         };
     };
@@ -110,7 +96,7 @@ class ScratchifyExtension {
 	goToLocation({LOCATION}) {
 		this.audio_player.currentTime = LOCATION;
 	};
-
+	
 	enableLoop({}) {
 		this.audio_player.loop = true;
 	};
@@ -118,25 +104,8 @@ class ScratchifyExtension {
 	disableLoop({}) {
 		this.audio_player.loop = false;
 	};
-
-	audioLocation({}) {
+	location({}) {
 		return this.audio_player.currentTime;
-	};
-
-	audioDuration({}) {
-		return this.audio_player.duration;
-	};
-
-	audioPaused({}) {
-		return this.audio_player.paused;
-	};
-
-	audioEnded({}) {
-		return this.audio_player.ended;
-	};
-
-	loopEnabled({}) {
-		return this.audio_player.loop;
 	};
 };
 
