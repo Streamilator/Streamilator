@@ -1,10 +1,13 @@
 {
-   "clientVersion": "0.0.5",
+   "clientVersion": "0.0.6",
    "extensionVersion": "1.1",
    "changelog": [
-      "Version 0.0.5 Changelog",
+      "Version 0.0.6 Changelog",
       "",
-      "The GUI now scales when the song list is hidden."
+      "Updated icons with ones from FontAwesome",
+      "Client now checks version",
+      "Changed dark mode background color to a nicer one",
+      "Fixed light mode breaking on load bug"
    ],
-   "changelogRows": 3
+   "changelogRows": 6
 }
