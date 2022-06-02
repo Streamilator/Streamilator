@@ -8,7 +8,7 @@ class ScratchifyExtension {
 		this.end_hat = 0;
 		this.audio_player = new Audio();
 		this.set_volume = 1;
-		this.version_number = '1.2';
+		this.version_number = '1.1';
     }
 
     getInfo () {
