@@ -1,4 +1,4 @@
-// Scratchify Extension v1.1
+// Scratchify Extension v1.2
 // https://github.com/Scratchify/Scratchify
 class ScratchifyExtension {
     constructor (runtime, extensionId) {
@@ -8,7 +8,7 @@ class ScratchifyExtension {
 		this.end_hat = 0;
 		this.audio_player = new Audio();
 		this.set_volume = 1;
-		this.version_number = '1.1';
+		this.version_number = '1.2';
     }
 
     getInfo () {
@@ -45,7 +45,7 @@ class ScratchifyExtension {
                     "text": 'resume',
                 },
 				{
-			"opcode": 'goToLocation',
+					"opcode": 'goToLocation',
                     "blockType": "command",
                     "text": 'go to location [LOCATION]',
 					"arguments": {
@@ -56,7 +56,7 @@ class ScratchifyExtension {
 					},
                 },
 				{
-			"opcode": 'setAudioVolume',
+					"opcode": 'setAudioVolume',
                     "blockType": "command",
                     "text": 'set volume [VOLUME]',
 					"arguments": {
@@ -66,6 +66,17 @@ class ScratchifyExtension {
 						},
 					},
                 },
+				{
+					"opcode": 'setPlaybackSpeed',
+					"blockType": "command",
+					"text": 'set playback speed [SPEED]',
+					"arguments": {
+						"SPEED": {
+							"type": "number",
+							"defaultValue": '1',
+						},
+					},
+				},
 				{
                 	"opcode": 'enableLoop',
                     "blockType": "command",
@@ -91,6 +102,16 @@ class ScratchifyExtension {
                     "blockType": "reporter",
                     "text": 'audio volume',
                 },
+					{
+					"opcode": 'audioSpeed',
+					"blockType": "reporter",
+					"text": 'audio speed',
+				},
+					{
+					"opcode": 'audioSource',
+					"blockType": "reporter",
+					"text": 'audio url',
+				},
 		    		{
                 	"opcode": 'audioPaused',
                     "blockType": "Boolean",
@@ -151,6 +172,10 @@ class ScratchifyExtension {
 		};
 	};
 
+	setPlaybackSpeed({SPEED}) {
+		this.audio_player.playbackRate = SPEED;
+	}
+
 	enableLoop({}) {
 		this.audio_player.loop = true;
 	};
@@ -169,6 +194,14 @@ class ScratchifyExtension {
 
 	audioVolume({}) {
 		return this.audio_player.volume * 100;
+	};
+
+	audioSpeed({}) {
+		return this.audio_player.playbackRate;
+	};
+
+	audioSource({}) {
+		return this.audio_player.src;
 	};
 
 	audioPaused({}) {
