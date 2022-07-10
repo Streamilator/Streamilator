@@ -1,6 +1,6 @@
 # Streamilator
 Streamilator is a streaming service coded in Scratch 3.0!
-
+## Credits
 
 Logo credited to M.D. on the Meower Media Co. Discord
 
