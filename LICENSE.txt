@@ -1,7 +1,7 @@
 THE MEOW LICENSE ("MEOW") 1.3 - Last revised Jan 7, 2022.
 
-COPYRIGHT (C) 2020-2022 Meower Media Co.
-Used for Scratchify
+COPYRIGHT (C) 2022 Streamilator
+Used for Streamilator
 
 Under this license:
 
