@@ -1,5 +1,5 @@
-// Scratchify Extension v1.2
-// https://github.com/Scratchify/Scratchify
+// Streamilator Extension v1.2.1
+// https://github.com/Scratchify/Streamilator
 class ScratchifyExtension {
     constructor (runtime, extensionId) {
 		this.icon = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI0NSIgaGVpZ2h0PSI0NSIgdmlld0JveD0iMCwwLDQ1LDQ1Ij48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMjE3LjUsLTE1Ny41KSI+PGcgZGF0YS1wYXBlci1kYXRhPSJ7JnF1b3Q7aXNQYWludGluZ0xheWVyJnF1b3Q7OnRydWV9IiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3Ryb2tlLWRhc2hhcnJheT0iIiBzdHJva2UtZGFzaG9mZnNldD0iMCIgc3R5bGU9Im1peC1ibGVuZC1tb2RlOiBub3JtYWwiPjxwYXRoIGQ9Ik0yMTcuNSwxODBjMCwtMTIuNCAxMC4xLC0yMi41IDIyLjUsLTIyLjVjMTIuNCwwIDIyLjUsMTAuMSAyMi41LDIyLjVjMCwxMi40IC0xMC4xLDIyLjUgLTIyLjUsMjIuNWMtMTIuNCwwIC0yMi41LC0xMC4xIC0yMi41LC0yMi41eiIgZmlsbD0iIzBmYmQ4YyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PHBhdGggZD0iTTIzMi4zNDIzNywxODQuMjQ2NjFsMC4xMjA2NywtMTkuMDY2ODJsMTUuOTI5MjQsNi45OTkyMmwtMC4xMjA2Nyw5LjA1MDcxIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjM4Ljg2OTE5LDE4OC4wNDYyNGMwLDMuNzQwNTkgLTMuMDMzNCw2Ljc3Mzk4IC02Ljc3Mzk4LDYuNzczOThjLTMuNzQwNTksMCAtNi43NzI5NywtMy4wMzM0IC02Ljc3Mjk3LC02Ljc3Mzk4YzAsLTMuNzQwNTkgMy4wMzI0LC02Ljc3Mjk3IDYuNzcyOTcsLTYuNzcyOTdjMy43NDA1OSwwIDYuNzczOTgsMy4wMzM0IDYuNzczOTgsNi43NzI5N3oiIGZpbGw9IiNhNmQzODgiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIvPjxwYXRoIGQ9Ik0yNTQuNjc3NzYsMTg1LjYzMjcxYzAsMy43NDA1OSAtMy4wMzM0LDYuNzczOTggLTYuNzczOTgsNi43NzM5OGMtMy43NDA1OSwwIC02Ljc3Mjk3LC0zLjAzMzQgLTYuNzcyOTcsLTYuNzczOThjMCwtMy43NDA1OSAzLjAzMjQsLTYuNzcyOTcgNi43NzI5NywtNi43NzI5N2MzLjc0MDU5LDAgNi43NzM5OCwzLjAzMzQgNi43NzM5OCw2Ljc3Mjk3eiIgZmlsbD0iI2VjZmZhMyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PC9nPjwvZz48L3N2Zz4=';
@@ -8,7 +8,7 @@ class ScratchifyExtension {
 		this.end_hat = 0;
 		this.audio_player = new Audio();
 		this.set_volume = 1;
-		this.version_number = '1.2';
+		this.version_number = '1.2.1';
     }
 
     getInfo () {
@@ -18,7 +18,7 @@ class ScratchifyExtension {
 			"blockIconURI": this.icon,
 			"menuIconURI": this.menuicon,
             "blocks": [
-				{
+					{
                 	"opcode": 'playAudioFromURL',
                     "blockType": "command",
                     "text": 'play audio [URL]',
@@ -29,22 +29,22 @@ class ScratchifyExtension {
 						},
 					},
                 },
-				{
+					{
                 	"opcode": 'stopAudio',
                     "blockType": "command",
                     "text": 'stop audio',
                 },
-				{
+					{
                 	"opcode": 'pauseAudio',
                     "blockType": "command",
                     "text": 'pause',
                 },
-				{
+					{
                 	"opcode": 'resumeAudio',
                     "blockType": "command",
                     "text": 'resume',
                 },
-				{
+					{
 					"opcode": 'goToLocation',
                     "blockType": "command",
                     "text": 'go to location [LOCATION]',
@@ -55,7 +55,7 @@ class ScratchifyExtension {
 						},
 					},
                 },
-				{
+					{
 					"opcode": 'setAudioVolume',
                     "blockType": "command",
                     "text": 'set volume [VOLUME]',
@@ -66,7 +66,7 @@ class ScratchifyExtension {
 						},
 					},
                 },
-				{
+					{
 					"opcode": 'setPlaybackSpeed',
 					"blockType": "command",
 					"text": 'set playback speed [SPEED]',
@@ -122,17 +122,22 @@ class ScratchifyExtension {
                     "blockType": "Boolean",
                     "text": 'audio ended?',
                 },
+					{
+					"opcode": 'audioBuffering',
+					"blockType": "Boolean",
+					"text": 'audio buffering?',
+				},
 		    		{
                 	"opcode": 'loopEnabled',
                     "blockType": "Boolean",
                     "text": 'loop enabled?',
                 },
-				{
+					{
                 	"opcode": 'whenAudioEnds',
                     "blockType": "hat",
                     "text": 'when audio ends',
                 },
-				{
+					{
                 	"opcode": 'versionNumber',
                     "blockType": "reporter",
                     "text": 'extension version',
@@ -166,7 +171,7 @@ class ScratchifyExtension {
 	};
 
 	setAudioVolume({VOLUME}) {
-		if (VOLUME > 0 && VOLUME < 100) {
+		if (VOLUME >= 0 && VOLUME <= 100) {
  			this.audio_player.volume = VOLUME / 100;
 			this.set_volume = VOLUME / 100;
 		};
@@ -210,6 +215,10 @@ class ScratchifyExtension {
 
 	audioEnded({}) {
 		return this.audio_player.ended;
+	};
+
+	audioBuffering({}) {
+		return this.audio_player.buffered;
 	};
 
 	loopEnabled({}) {
