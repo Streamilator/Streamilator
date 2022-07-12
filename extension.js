@@ -122,11 +122,6 @@ class ScratchifyExtension {
                     "blockType": "Boolean",
                     "text": 'audio ended?',
                 },
-					{
-					"opcode": 'audioBuffering',
-					"blockType": "Boolean",
-					"text": 'audio buffering?',
-				},
 		    		{
                 	"opcode": 'loopEnabled',
                     "blockType": "Boolean",
@@ -215,10 +210,6 @@ class ScratchifyExtension {
 
 	audioEnded({}) {
 		return this.audio_player.ended;
-	};
-
-	audioBuffering({}) {
-		return this.audio_player.buffered;
 	};
 
 	loopEnabled({}) {
