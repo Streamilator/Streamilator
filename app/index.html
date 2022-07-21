@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<!-- Created with https://packager.turbowarp.org/ -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <!-- We only include this to explicitly loosen the CSP of various packager environments. It does not provide any security. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: blob:">
+  <title>Streamilator 0.0.8</title>
+  <style>
+    body {
+      color: #ffffff;
+      font-family: sans-serif;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    :root, body.is-fullscreen {
+      background-color: #000000;
+    }
+    [hidden] {
+      display: none !important;
+    }
+    h1 {
+      font-weight: normal;
+    }
+    a {
+      color: inherit;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    #app, #loading, #error, #launch {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: default;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #000000;
+    }
+    #launch {
+      background-color: rgba(0, 0, 0, 0.7);
+      cursor: pointer;
+    }
+    .green-flag {
+      width: 80px;
+      height: 80px;
+      padding: 16px;
+      border-radius: 100%;
+      background: rgba(255, 255, 255, 0.75);
+      border: 3px solid hsla(0, 100%, 100%, 1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-sizing: border-box;
+    }
+    #loading {
+      
+    }
+    .progress-bar-outer {
+      border: 1px solid currentColor;
+      height: 10px;
+      width: 200px;
+      max-width: 200px;
+    }
+    .progress-bar-inner {
+      height: 100%;
+      width: 0;
+      background-color: currentColor;
+    }
+    .loading-text, noscript {
+      font-weight: normal;
+      font-size: 36px;
+      margin: 0 0 16px;
+    }
+    .loading-image {
+      margin: 0 0 16px;
+    }
+    #error-message, #error-stack {
+      font-family: monospace;
+      max-width: 600px;
+      white-space: pre-wrap;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #error-stack {
+      text-align: left;
+      max-height: 200px;
+      overflow: auto;
+    }
+    .control-button {
+      width: 2rem;
+      height: 2rem;
+      padding: 0.375rem;
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.5rem;
+      user-select: none;
+      -webkit-user-select: none;
+      cursor: pointer;
+      border: 0;
+      border-radius: 4px;
+    }
+    .control-button:hover {
+      background: #ff4c4c26;
+    }
+    .control-button.active {
+      background: #ff4c4c59;
+    }
+    .fullscreen-button {
+      background: white !important;
+    }
+    .standalone-fullscreen-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 0 0 0 4px;
+      padding: 4px;
+      cursor: pointer;
+    }
+    .sc-canvas {
+      cursor: auto;
+    }
+    .sc-monitor-root[opcode^="data_"] .sc-monitor-value-color {
+      background-color: #ff8c1a;
+    }
+    .sc-monitor-row-value-outer {
+      background-color: #fc662c;
+    }
+    .sc-monitor-row-value-editing .sc-monitor-row-value-outer {
+      background-color: #e25b27;
+    }
+    
+  </style>
+  <meta name="theme-color" content="#000000">
+  
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="launch" class="screen" hidden title="Click to start">
+    <div class="green-flag">
+      <svg viewBox="0 0 16.63 17.5" width="42" height="44">
+        <defs><style>.cls-1,.cls-2{fill:#4cbf56;stroke:#45993d;stroke-linecap:round;stroke-linejoin:round;}.cls-2{stroke-width:1.5px;}</style></defs>
+        <path class="cls-1" d="M.75,2A6.44,6.44,0,0,1,8.44,2h0a6.44,6.44,0,0,0,7.69,0V12.4a6.44,6.44,0,0,1-7.69,0h0a6.44,6.44,0,0,0-7.69,0"/>
+        <line class="cls-2" x1="0.75" y1="16.75" x2="0.75" y2="0.75"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="loading" class="screen">
+    <noscript>Enable JavaScript</noscript>
+    
+    
+    <div class="progress-bar-outer"><div class="progress-bar-inner" id="loading-inner"></div></div>
+  </div>
+
+  <div id="error" class="screen" hidden>
+    <h1>Error</h1>
+    <details>
+      <summary id="error-message"></summary>
+      <p id="error-stack"></p>
+    </details>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    const appElement = document.getElementById('app');
+    const launchScreen = document.getElementById('launch');
+    const loadingScreen = document.getElementById('loading');
+    const loadingInner = document.getElementById('loading-inner');
+    const errorScreen = document.getElementById('error');
+    const errorScreenMessage = document.getElementById('error-message');
+    const errorScreenStack = document.getElementById('error-stack');
+
+    const handleError = (error) => {
+      console.error(error);
+      if (!errorScreen.hidden) return;
+      errorScreen.hidden = false;
+      errorScreenMessage.textContent = '' + error;
+      let debug = error && error.stack || 'no stack';
+      debug += '\nUser agent: ' + navigator.userAgent;
+      errorScreenStack.textContent = debug;
+    };
+    const setProgress = (progress) => {
+      if (loadingInner) loadingInner.style.width = progress * 100 + '%';
+    };
+    const interpolate = (a, b, t) => a + t * (b - a);
+
+    try {
+      setProgress(0.1);
+
+      const scaffolding = new Scaffolding.Scaffolding();
+      scaffolding.width = 640;
+      scaffolding.height = 360;
+      scaffolding.resizeMode = "preserve-ratio";
+      scaffolding.editableLists = false;
+      scaffolding.setup();
+      scaffolding.appendTo(appElement);
+
+      const vm = scaffolding.vm;
+      window.scaffolding = scaffolding;
+      window.vm = scaffolding.vm;
+      window.Scratch = {
+        vm,
+        renderer: vm.renderer,
+        audioEngine: vm.runtime.audioEngine,
+        bitmapAdapter: vm.runtime.v2BitmapAdapter,
+        videoProvider: vm.runtime.ioDevices.video.provider
+      };
+
+      scaffolding.setUsername("player####".replace(/#/g, () => Math.floor(Math.random() * 10)));
+      scaffolding.setAccentColor("#ff4c4c");
+
+      ;
+
+      vm.setTurboMode(false);
+      if (vm.setInterpolation) vm.setInterpolation(false);
+      if (vm.setFramerate) vm.setFramerate(30);
+      if (vm.renderer.setUseHighQualityRender) vm.renderer.setUseHighQualityRender(true);
+      if (vm.setRuntimeOptions) vm.setRuntimeOptions({
+        fencing: true,
+        miscLimits: true,
+        maxClones: 9999999999,
+      });
+      if (vm.setCompilerOptions) vm.setCompilerOptions({
+        enabled: true,
+        warpTimer: false
+      });
+
+      if (typeof ScaffoldingAddons !== 'undefined') {
+        ScaffoldingAddons.run(scaffolding, {"gamepad":false,"pointerlock":false,"specialCloudBehaviors":false,"unsafeCloudBehaviors":false,"pause":false});
+      }
+
+      for (const extension of []) {
+        vm.extensionManager.loadExtensionURL(extension);
+      }
+
+    } catch (e) {
+      handleError(e);
+    }
+  </script>
+  <script>
+    try {
+      class Networking {
+    constructor (runtime, extensionId) {
+		this.cl_icon = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNS4yLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA0NSA0NSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDUgNDU7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOiMwRkJEOEM7fQ0KCS5zdDF7ZmlsbDpub25lO3N0cm9rZTojRkZGRkZGO3N0cm9rZS13aWR0aDo0O3N0cm9rZS1saW5lY2FwOnJvdW5kO3N0cm9rZS1saW5lam9pbjpyb3VuZDtzdHJva2UtbWl0ZXJsaW1pdDoxMDt9DQo8L3N0eWxlPg0KPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTIxNy41MDAxNCwtMTU3LjUwMDEzKSI+DQoJPGc+DQoJCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0yMTcuNSwxODBjMC0xMi40LDEwLjEtMjIuNSwyMi41LTIyLjVzMjIuNSwxMC4xLDIyLjUsMjIuNXMtMTAuMSwyMi41LTIyLjUsMjIuNVMyMTcuNSwxOTIuNCwyMTcuNSwxODANCgkJCUwyMTcuNSwxODB6Ii8+DQoJCTxnPg0KCQkJPHBhdGggY2xhc3M9InN0MSIgZD0iTTIzMC4zLDE4MC4xYzUuNy00LjcsMTMuOS00LjcsMTkuNiwwIi8+DQoJCQk8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjI1LjMsMTc1LjFjOC40LTcuNCwyMS03LjQsMjkuNCwwIi8+DQoJCQk8cGF0aCBjbGFzcz0ic3QxIiBkPSJNMjM1LjIsMTg1YzIuOS0yLjEsNi44LTIuMSw5LjcsMCIvPg0KCQkJPHBhdGggY2xhc3M9InN0MSIgZD0iTTI0MCwxOTAuNEwyNDAsMTkwLjQiLz4NCgkJPC9nPg0KCTwvZz4NCjwvZz4NCjwvc3ZnPg0K';
+		this.cl_block = 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyNS4yLjMsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA0NSA0NSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDUgNDU7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJLnN0MHtmaWxsOm5vbmU7c3Ryb2tlOiNGRkZGRkY7c3Ryb2tlLXdpZHRoOjQ7c3Ryb2tlLWxpbmVjYXA6cm91bmQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjEwO30NCjwvc3R5bGU+DQo8Zz4NCgk8cGF0aCBjbGFzcz0ic3QwIiBkPSJNMTIuOCwyMi42YzUuNy00LjcsMTMuOS00LjcsMTkuNiwwIi8+DQoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTcuOCwxNy42YzguNC03LjQsMjEtNy40LDI5LjQsMCIvPg0KCTxwYXRoIGNsYXNzPSJzdDAiIGQ9Ik0xNy43LDI3LjVjMi45LTIuMSw2LjgtMi4xLDkuNywwIi8+DQoJPHBhdGggY2xhc3M9InN0MCIgZD0iTTIyLjUsMzIuOUwyMi41LDMyLjkiLz4NCjwvZz4NCjwvc3ZnPg0K';
+		this.isRunning = false;
+		this.socketData = "";
+		this.runtime = runtime;
+
+		this.connect_hat = 0;
+		this.packet_hat = 0;
+		this.close_hat = 0;
+		this.link_status = 0;
+
+		this.packet_queue = {};
+		this.listening_for_packet = {};
+		this.specific_packet_listener = {};
+    }
+
+    getInfo () {
+        return {
+            "id": 'networking',
+            "name": 'CloudLink TURBO',
+			"blockIconURI": this.cl_block,
+			"menuIconURI": this.cl_icon,
+            "blocks": [
+				{
+                	"opcode": 'linkState',
+                    "blockType": "reporter",
+                    "text": 'Link Status'
+                },
+                {
+                	"opcode": 'getSocketData',
+                    "blockType": "reporter",
+                    "text": 'Socket Data'
+                },
+				{
+                	"opcode": 'getQueueSize',
+                    "blockType": "reporter",
+                    "text": 'Packet Queue Size'
+                },
+				{
+                	"opcode": 'rawPacketQueue',
+                    "blockType": "reporter",
+                    "text": 'Packet Queue'
+                },
+				{
+                	"opcode": 'getQueueItem',
+                    "blockType": "reporter",
+                    "text": 'Item [item] of Packet Queue',
+					"arguments": {
+						"item": {
+							"type": "number",
+							"defaultValue": 1,
+						},
+					}
+                },
+				{
+					"opcode": 'fetchURL', 
+					"blockType": "reporter",
+					"blockAllThreads": "true",
+					"text": 'Fetch data from URL [url]',
+					"arguments": {
+						"url": {
+							"type": "string",
+							"defaultValue": 'https://mikedev101.github.io/cloudlink/fetch_test',
+						},
+					}
+				},
+                {
+					"opcode": 'requestURL', 
+					"blockType": "reporter",
+					"blockAllThreads": "true",
+					"text": 'Request URL [method] [url] [data] [headers]',
+					"arguments": {
+                        "method": {
+							"type": "string",
+							"defaultValue": 'GET',
+						},
+						"url": {
+							"type": "string",
+							"defaultValue": 'https://mikedev101.github.io/cloudlink/fetch_test',
+						},
+                        "data": {
+                            "type": "string",
+                            "defaultValue": '{}'
+                        },
+                        "headers": {
+                            "type": "string",
+                            "defaultValue": '{}'
+                        },
+					}
+				},
+				{
+                	"opcode": 'makeJSON',
+                    "blockType": "reporter",
+                    "text": 'Convert [toBeJSONified] to JSON',
+					"arguments": {
+						"toBeJSONified": {
+							"type": "string",
+							"defaultValue": '{"test": true}',
+						},
+					}
+                },
+				{
+					"opcode": 'parseJSON',
+					"blockType": "reporter",
+					"text": '[PATH] of [JSON_STRING]',
+					"arguments": {
+						"PATH": {
+							"type": "string",
+							"defaultValue": 'fruit/apples',
+						},
+						"JSON_STRING": {
+							"type": "string",
+							"defaultValue": '{"fruit": {"apples": 2, "bananas": 3}, "total_fruit": 5}',
+						},
+					},
+				},
+				{
+					"opcode": 'getFromJSONArray',
+					"blockType": "reporter",
+					"text": 'Get [NUM] from JSON array [ARRAY]',
+					"arguments": {
+						"NUM": {
+							"type": "number",
+							"defaultValue": 0,
+						},
+						"ARRAY": {
+							"type": "string",
+							"defaultValue": '["foo","bar"]',
+						}
+					}
+				},
+				{
+                	"opcode": 'isValidJSON',
+                    "blockType": "Boolean",
+                    "text": 'Is [JSON_STRING] valid JSON?',
+					"arguments": {
+						"JSON_STRING": {
+							"type": "string",
+							"defaultValue": '{"fruit": {"apples": 2, "bananas": 3}, "total_fruit": 5}',
+						},
+					},
+                },
+                {
+                	"opcode": 'getSocketState',
+                    "blockType": "Boolean",
+                    "text": 'Connected?',
+                },
+				{
+                	"opcode": 'onConnect',
+                    "blockType": "hat",
+                    "text": 'On Connect',
+                },
+				{
+                	"opcode": 'onPacket',
+                    "blockType": "hat",
+                    "text": 'On New Socket Data',
+                },
+				{
+                	"opcode": 'onPacketWithCMD',
+                    "blockType": "hat",
+					"text": 'On New Socket Data with CMD: [CMD]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						}
+                    }
+                },
+				{
+                	"opcode": 'onClose',
+                    "blockType": "hat",
+                    "text": 'On Disconnect',
+                },
+				{
+                	"opcode": 'sendData',
+                    "blockType": "command",
+                    "text": 'Send [DATA]',
+					"blockAllThreads": "true",
+                    "arguments": {
+                        "DATA": {
+                            "type": "string",
+                            "defaultValue": '{"foo": "bar"}'
+                        }
+                    }
+                },
+				{
+                	"opcode": 'sendDataWithResponse',
+                    "blockType": "command",
+                    "text": 'Send [DATA] for listener CMD: [CMD] Listener ID: [ID]',
+					"blockAllThreads": "true",
+                    "arguments": {
+                        "DATA": {
+                            "type": "string",
+                            "defaultValue": '{"foo": "bar"}'
+                        },
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+                    }
+                },
+				{
+                    "opcode": 'openSocket',
+                    "blockType": "command",
+                    "text": 'Connect to [ADDRESS]',
+					"blockAllThreads": "true",
+					"arguments": {
+						"ADDRESS": {
+							"type": "string",
+							"defaultValue": 'ws://127.0.0.1:3000/',
+						},
+					},
+                },
+                {
+                	"opcode": 'closeSocket',
+                    "blockType": "command",
+					"blockAllThreads": "true",
+                    "text": 'Disconnect',
+                },
+				{
+                	"opcode": 'clearPacketQueue',
+                    "blockType": "command",
+					"blockAllThreads": "true",
+                    "text": 'Clear Packet Queue',
+                },
+				{
+                	"opcode": 'registerNewListener',
+                    "blockType": "command",
+					"text": 'Create new listener for CMD: [CMD] Listener ID: [ID]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+					},
+                },
+				{
+                	"opcode": 'resetListener',
+                    "blockType": "command",
+					"text": 'Reset listener for CMD: [CMD] Listener ID: [ID]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+					},
+                },
+				{
+                	"opcode": 'waitForResponse',
+                    "blockType": "Boolean",
+					"text": 'Listen for packet with CMD: [CMD]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+					},
+                },
+				{
+                	"opcode": 'waitForListenerResponse',
+                    "blockType": "Boolean",
+					"text": 'Listen for packet for CMD: [CMD] Listener ID: [ID]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+					},
+                },
+				{
+                	"opcode": 'checkJSONforValue',
+                    "blockType": "Boolean",
+					"text": 'Does JSON [JSON_STRING] contains [VALUE]?',
+					"arguments": {
+						"JSON_STRING": {
+							"type": "string",
+							"defaultValue": '{"foo": "bar"}',
+						},
+						"VALUE": {
+							"type": "string",
+							"defaultValue": 'bar',
+						},
+					},
+                },
+				{
+                	"opcode": 'getPacketResponse',
+                    "blockType": "reporter",
+                    "text": 'Packet Response for [CMD]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+					},
+                },
+				{
+                	"opcode": 'getPacketResponseQueueNumb',
+                    "blockType": "reporter",
+                    "text": 'Packet Response Queue Number for [CMD]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+					},
+                },
+				{
+                	"opcode": 'getListenerPacketResponse',
+                    "blockType": "reporter",
+                    "text": 'Listener Response for CMD: [CMD] Listener ID: [ID]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+					},
+                },
+				{
+                	"opcode": 'getListenerPacketResponseQueueNumb',
+                    "blockType": "reporter",
+                    "text": 'Listener Response Queue Number for CMD: [CMD] Listener ID: [ID]',
+					"arguments": {
+						"CMD": {
+							"type": "string",
+							"defaultValue": 'statuscode',
+						},
+						"ID": {
+							"type": "string",
+							"defaultValue": 'listen0',
+						},
+					},
+                },
+			]
+        };
+    };
+	
+	registerNewListener({CMD, ID}) {
+		if (this.isRunning) {
+			if (!(String(CMD) in this.specific_packet_listener)) {
+				this.specific_packet_listener[String(CMD)] = {};
+			};
+			if (!(String(ID) in this.specific_packet_listener[String(CMD)])) {
+				this.specific_packet_listener[String(CMD)][String(ID)] = {"returned": false, "val": "", "queue": -1};
+				console.log("Registered new listener:", String(ID));
+			};
+		};
+	};
+	
+	resetListener({CMD, ID}) {
+		if (this.isRunning) {
+			if ((String(CMD) in this.specific_packet_listener) && (String(ID) in this.specific_packet_listener[String(CMD)])) {
+				this.specific_packet_listener[String(CMD)][String(ID)]["returned"] = false;
+			};
+		};
+	};
+	
+	checkJSONforValue({JSON_STRING, VALUE}) {
+		try {
+			return Object.values(JSON.parse(JSON_STRING)).includes(VALUE);
+		} catch(err) {
+			return false;
+		};
+	};
+	
+	waitForResponse({CMD}) {
+		if (this.isRunning) {
+			if (!(String(CMD) in this.listening_for_packet)) {
+				this.listening_for_packet[String(CMD)] = {"returned": false, "val": "", "queue": -1};
+				return false;
+			} else if (this.listening_for_packet[String(CMD)]["returned"]) {
+				this.listening_for_packet[String(CMD)]["returned"] = false;
+				return true;
+			} else {
+				return false;
+			};
+		} else {
+			return false;
+		};
+	};
+	
+	waitForListenerResponse({CMD, ID}) {
+		if (this.isRunning) {
+			if ((String(CMD) in this.specific_packet_listener) && (String(ID) in this.specific_packet_listener[String(CMD)])) {
+				return (this.specific_packet_listener[String(CMD)][String(ID)]["returned"]);
+			} else {
+				return false;
+			};
+		} else {
+			return false;
+		}
+	};
+	
+	getListenerPacketResponse({CMD, ID}) {
+		if (this.isRunning) {
+			try {
+				return JSON.stringify(this.specific_packet_listener[String(CMD)][String(ID)]["val"]);
+			} catch(err) {
+				// console.log(err);
+				return "";
+			};
+		} else {
+			return "";
+		};
+	};
+	
+	getListenerPacketResponseQueueNumb({CMD, ID}) {
+		if (this.isRunning) {
+			try {
+				return this.specific_packet_listener[String(CMD)][String(ID)]["queue"];
+			} catch(err) {
+				// console.log(err);
+				return "";
+			};
+		} else {
+			return "";
+		};
+	}
+	
+	getPacketResponse({CMD}) {
+		if (this.isRunning) {
+			try {
+				return JSON.stringify(this.listening_for_packet[String(CMD)]["val"]);
+			} catch(err) {
+				// console.log(err);
+				return "";
+			};
+		} else {
+			return "";
+		};
+	};
+	
+	getPacketResponseQueueNumb({CMD}) {
+		if (this.isRunning) {
+			try {
+				return this.listening_for_packet[String(CMD)]["queue"];
+			} catch(err) {
+				// console.log(err);
+				return "";
+			};
+		} else {
+			return "";
+		};
+	}
+	
+	linkState() {
+		return Number(this.link_status);
+	}
+	
+	getQueueItem(args) {
+		try {
+			return JSON.stringify(this.packet_queue[args.item]);
+		} catch(err) {
+			// console.log(err);
+			return "";
+		};
+	};
+	
+	rawPacketQueue() {
+		return JSON.stringify(this.packet_queue);
+	}
+	
+	getQueueSize() {
+		return Number(Object.keys(this.packet_queue).length);
+	};
+	
+	clearPacketQueue() {
+		this.packet_queue = {};
+	};
+	
+	isValidJSON({JSON_STRING}) {
+		try {
+			JSON.parse(JSON_STRING);
+			return true;
+		} catch(err) {
+			return false;
+		}
+	};
+	
+	makeJSON({
+		toBeJSONified
+	}) {
+		console.log(typeof(toBeJSONified));
+		if (typeof(toBeJSONified) == "string") {
+			try {
+				JSON.parse(toBeJSONified);
+				return String(toBeJSONified);
+			} catch(err) {
+				return "Not JSON!";
+			}
+		} else if (typeof(toBeJSONified) == "object") {
+			return JSON.stringify(toBeJSONified);
+		} else {
+			return "Not JSON!";
+		};
+	};
+	
+	onClose() {
+		if (this.close_hat == 0 && !this.isRunning) {
+			this.close_hat = 1;
+			return true;
+		} else {
+			return false;
+		};
+	};
+	
+	onPacket() {
+		if (this.packet_hat == 0 && this.isRunning) {
+			this.packet_hat = 1;
+			return true;
+		} else {
+			return false;
+		};
+	};
+	
+	onPacketWithCMD({CMD}) {
+		if (this.isRunning) {
+			if (!(String(CMD) in this.listening_for_packet)) {
+				this.listening_for_packet[String(CMD)] = {"returned": false, "val": "", "queue": -1};
+				return false;
+			} else if (this.listening_for_packet[String(CMD)]["returned"]) {
+				this.listening_for_packet[String(CMD)]["returned"] = false;
+				return true;
+			} else {
+				return false;
+			};
+		} else {
+			return false;
+		};
+	};
+	
+	onConnect() {
+		if (this.connect_hat == 0 && this.isRunning) {
+			this.connect_hat = 1;
+			return true;
+		} else {
+			return false;
+		};
+	};
+	
+	fetchURL(args) {
+		return fetch(args.url, {
+            method: "GET"
+        }).then(response => response.text());
+	};
+
+    requestURL(args) {
+        return fetch(args.url, {
+            method: args.method,
+            headers: JSON.parse(args.headers),
+            body: JSON.parse(args.data)
+        }).then(response => response.text());
+	};
+	
+	parseJSON({
+		PATH,
+		JSON_STRING
+	}) {
+		try {
+			const path = PATH.toString().split('/').map(prop => decodeURIComponent(prop));
+			if (path[0] === '') path.splice(0, 1);
+			if (path[path.length - 1] === '') path.splice(-1, 1);
+			let json;
+			try {
+				json = JSON.parse(' ' + JSON_STRING);
+			} catch (e) {
+				return e.message;
+			};
+			path.forEach(prop => json = json[prop]);
+			if (json === null) return 'null';
+			else if (json === undefined) return '';
+			else if (typeof json === 'object') return JSON.stringify(json);
+			else return json.toString();
+		} catch (err) {
+			return '';
+		};
+	};
+	
+getFromJSONArray({
+	NUM,
+	ARRAY
+}) {
+	var json_array = JSON.parse(ARRAY);
+	if (json_array[NUM] == "undefined") {
+		return "";
+	} else {
+		return json_array[NUM];
+	}  
+};
+
+    openSocket({
+		ADDRESS
+	}) {
+    	if (this.isRunning == false) {
+    		console.log("Starting socket.");
+			const self = this;
+			self.link_status = 1;
+    		this.mWS = new WebSocket(String(ADDRESS));
+    		
+    		this.mWS.onerror = function(){
+    			self.isRunning = false;
+				console.log("failed to connect to the server.");
+				self.link_status = 3;
+    		};
+    		this.mWS.onopen = function(){
+    			self.isRunning = true;
+				self.packet_queue = {};
+				self.link_status = 2;
+    			console.log("successfully connected to the server.");
+    		};
+			this.mWS.onmessage = function(event){
+   				self.socketData = JSON.parse(event.data);
+				self.packet_hat = 0;
+				
+				if (String(self.socketData["cmd"]) in self.listening_for_packet) {
+					if (!(self.listening_for_packet[String(self.socketData["cmd"])]["returned"])) {
+						self.listening_for_packet[String(self.socketData["cmd"])]["val"] = self.socketData;
+						self.listening_for_packet[String(self.socketData["cmd"])]["returned"] = true;
+						self.listening_for_packet[String(self.socketData["cmd"])]["queue"] = (Number(Object.keys(self.packet_queue).length) + 1);
+						console.log("GOT RESPONSE FOR", String(self.socketData["cmd"]), ":", self.socketData);
+					};
+				};
+				
+				if (String(self.socketData["cmd"]) in self.specific_packet_listener){
+					if ("listener" in self.socketData) {
+						if (String(self.socketData["listener"]) in self.specific_packet_listener[String(self.socketData["cmd"])]) {
+							if (!(self.specific_packet_listener[String(self.socketData["cmd"])][String(self.socketData["listener"])]["returned"])) {
+								self.specific_packet_listener[String(self.socketData["cmd"])][String(self.socketData["listener"])]["val"] = self.socketData;
+								self.specific_packet_listener[String(self.socketData["cmd"])][String(self.socketData["listener"])]["returned"] = true;
+								self.specific_packet_listener[String(self.socketData["cmd"])][String(self.socketData["listener"])]["queue"] = (Number(Object.keys(self.packet_queue).length) + 1);
+								console.log("GOT RESPONSE FOR LISTENER", String(self.socketData["listener"]), ":", self.socketData);
+							};
+						};
+					};
+				};
+				
+				self.packet_queue[String(Number(Object.keys(self.packet_queue).length) + 1)] = self.socketData;
+   				console.log("RECEIVED:", self.socketData);
+   			};
+			this.mWS.onclose = function() {
+				self.isRunning = false;
+				self.connect_hat = 0;
+				self.packet_hat = 0;
+				if (self.close_hat == 1) {
+					self.close_hat = 0;
+				};
+				self.socketData = "";
+				self.link_status = 3;
+				self.packet_queue = {};
+				self.listening_for_packet = {};
+				self.specific_packet_listener = {};
+				console.log("Server has disconnected.");
+			};
+    	} else {
+    		console.log("Socket is already open.");
+    	};
+    }
+
+    closeSocket() {
+        if (this.isRunning == true) {
+    		console.log("Closing socket.");
+    		this.mWS.close(1000,'script closure');
+			this.connect_hat = 0;
+			this.packet_hat = 0;
+			this.close_hat = 0;
+    		this.isRunning = false;
+			this.link_status = 3;
+			this.socketData = "";
+			this.packet_queue = {};
+			this.listening_for_packet = {};
+			this.specific_packet_listener = {};
+    	} else {
+    		console.log("Socket is not open.");
+    	};
+    }
+
+   	getSocketState() {
+   		//Check is the server is still running
+   		if (this.isRunning){
+   			var response = this.mWS.readyState;
+   			if (response == 2 || response == 3) {
+   				this.isRunning = false;
+				this.connect_hat = 0;
+				this.packet_hat = 0;
+				if (this.close_hat == 1) {
+					this.close_hat = 0;
+				};
+				this.link_status = 3;
+				this.socketData = "";
+				this.packet_queue = {};
+				this.listening_for_packet = {};
+				this.specific_packet_listener = {};
+   				// console.log("Server has disconnected.")
+   			};
+   		};
+   		return this.isRunning;
+   	}
+
+   	sendData(args) {
+   		if (this.isRunning == true) {
+   			this.mWS.send(args.DATA);
+   			console.log("SENT:", args.DATA);
+   		};
+   	};
+	
+	sendDataWithResponse({DATA, CMD, ID}) {
+		if (this.isRunning) {
+			// Create listener if not already created
+			if (!(String(CMD) in this.specific_packet_listener)) {
+				this.specific_packet_listener[String(CMD)] = {};
+			};
+			if (!(String(ID) in this.specific_packet_listener[String(CMD)])) {
+				this.specific_packet_listener[String(CMD)][String(ID)] = {"returned": false, "val": "", "queue": -1};
+				console.log("Registered new listener:", String(ID));
+			} else if ((String(CMD) in this.specific_packet_listener) && (String(ID) in this.specific_packet_listener[String(CMD)])) {
+				// Reset listener if already created
+				this.specific_packet_listener[String(CMD)][String(ID)]["returned"] = false;
+			};
+			
+			// Send payload
+			this.mWS.send(DATA);
+   			console.log("SENT:", DATA);
+		};
+	};
+
+   	getSocketData() {
+   		//Check is the server is still running
+   		return JSON.stringify(this.socketData);
+   	};
+};
+
+(function() {
+    var extensionClass = Networking;
+    if (typeof window === "undefined" || !window.vm) {
+        Scratch.extensions.register(new extensionClass());
+		console.log("Sandboxed mode detected, performance will suffer because of the extension being sandboxed.");
+    } else {
+        var extensionInstance = new extensionClass(window.vm.extensionManager.runtime);
+        var serviceName = window.vm.extensionManager._registerInternalExtension(extensionInstance);
+        window.vm.extensionManager._loadedExtensions.set(extensionInstance.getInfo().id, serviceName);
+		console.log("Unsandboxed mode detected. Good.");
+    };
+})()
+// Streamilator Extension v1.2.1
+// https://github.com/Scratchify/Streamilator
+class ScratchifyExtension {
+    constructor (runtime, extensionId) {
+		this.icon = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSI0NSIgaGVpZ2h0PSI0NSIgdmlld0JveD0iMCwwLDQ1LDQ1Ij48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMjE3LjUsLTE1Ny41KSI+PGcgZGF0YS1wYXBlci1kYXRhPSJ7JnF1b3Q7aXNQYWludGluZ0xheWVyJnF1b3Q7OnRydWV9IiBmaWxsLXJ1bGU9Im5vbnplcm8iIHN0cm9rZS1saW5lam9pbj0ibWl0ZXIiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3Ryb2tlLWRhc2hhcnJheT0iIiBzdHJva2UtZGFzaG9mZnNldD0iMCIgc3R5bGU9Im1peC1ibGVuZC1tb2RlOiBub3JtYWwiPjxwYXRoIGQ9Ik0yMTcuNSwxODBjMCwtMTIuNCAxMC4xLC0yMi41IDIyLjUsLTIyLjVjMTIuNCwwIDIyLjUsMTAuMSAyMi41LDIyLjVjMCwxMi40IC0xMC4xLDIyLjUgLTIyLjUsMjIuNWMtMTIuNCwwIC0yMi41LC0xMC4xIC0yMi41LC0yMi41eiIgZmlsbD0iIzBmYmQ4YyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PHBhdGggZD0iTTIzMi4zNDIzNywxODQuMjQ2NjFsMC4xMjA2NywtMTkuMDY2ODJsMTUuOTI5MjQsNi45OTkyMmwtMC4xMjA2Nyw5LjA1MDcxIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjM4Ljg2OTE5LDE4OC4wNDYyNGMwLDMuNzQwNTkgLTMuMDMzNCw2Ljc3Mzk4IC02Ljc3Mzk4LDYuNzczOThjLTMuNzQwNTksMCAtNi43NzI5NywtMy4wMzM0IC02Ljc3Mjk3LC02Ljc3Mzk4YzAsLTMuNzQwNTkgMy4wMzI0LC02Ljc3Mjk3IDYuNzcyOTcsLTYuNzcyOTdjMy43NDA1OSwwIDYuNzczOTgsMy4wMzM0IDYuNzczOTgsNi43NzI5N3oiIGZpbGw9IiNhNmQzODgiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIvPjxwYXRoIGQ9Ik0yNTQuNjc3NzYsMTg1LjYzMjcxYzAsMy43NDA1OSAtMy4wMzM0LDYuNzczOTggLTYuNzczOTgsNi43NzM5OGMtMy43NDA1OSwwIC02Ljc3Mjk3LC0zLjAzMzQgLTYuNzcyOTcsLTYuNzczOThjMCwtMy43NDA1OSAzLjAzMjQsLTYuNzcyOTcgNi43NzI5NywtNi43NzI5N2MzLjc0MDU5LDAgNi43NzM5OCwzLjAzMzQgNi43NzM5OCw2Ljc3Mjk3eiIgZmlsbD0iI2VjZmZhMyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PC9nPjwvZz48L3N2Zz4=';
+    		this.menuicon = 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIzMS44NDU0NiIgaGVpZ2h0PSIzNC4wNjM4MSIgdmlld0JveD0iMCwwLDMxLjg0NTQ2LDM0LjA2MzgxIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMjI0LjA3NzI3LC0xNjIuMDEzNDUpIj48ZyBkYXRhLXBhcGVyLWRhdGE9InsmcXVvdDtpc1BhaW50aW5nTGF5ZXImcXVvdDs6dHJ1ZX0iIGZpbGwtcnVsZT0ibm9uemVybyIgc3Ryb2tlLWxpbmVqb2luPSJtaXRlciIgc3Ryb2tlLW1pdGVybGltaXQ9IjEwIiBzdHJva2UtZGFzaGFycmF5PSIiIHN0cm9rZS1kYXNob2Zmc2V0PSIwIiBzdHlsZT0ibWl4LWJsZW5kLW1vZGU6IG5vcm1hbCI+PGc+PHBhdGggZD0iTTIzMS42OTI4NSwxODQuNjA2ODFsMC4xMzA5MSwtMjAuNjg0MDdsMTcuMjgwMzYsNy41OTI4OWwtMC4xMzA5MSw5LjgxODM5IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMi41IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMjM4Ljc3MzI4LDE4OC43Mjg3MmMwLDQuMDU3ODYgLTMuMjkwNjksNy4zNDg1NCAtNy4zNDg1NCw3LjM0ODU0Yy00LjA1Nzg2LDAgLTcuMzQ3NDYsLTMuMjkwNjkgLTcuMzQ3NDYsLTcuMzQ4NTRjMCwtNC4wNTc4NiAzLjI4OTYsLTcuMzQ3NDYgNy4zNDc0NiwtNy4zNDc0NmM0LjA1Nzg2LDAgNy4zNDg1NCwzLjI5MDY5IDcuMzQ4NTQsNy4zNDc0NnoiIGZpbGw9IiNhNmQzODgiIHN0cm9rZT0ibm9uZSIgc3Ryb2tlLXdpZHRoPSIxIiBzdHJva2UtbGluZWNhcD0iYnV0dCIvPjxwYXRoIGQ9Ik0yNTUuOTIyNzMsMTg2LjExMDQ4YzAsNC4wNTc4NiAtMy4yOTA2OSw3LjM0ODU0IC03LjM0ODU0LDcuMzQ4NTRjLTQuMDU3ODYsMCAtNy4zNDc0NiwtMy4yOTA2OSAtNy4zNDc0NiwtNy4zNDg1NGMwLC00LjA1Nzg2IDMuMjg5NiwtNy4zNDc0NiA3LjM0NzQ2LC03LjM0NzQ2YzQuMDU3ODYsMCA3LjM0ODU0LDMuMjkwNjkgNy4zNDg1NCw3LjM0NzQ2eiIgZmlsbD0iI2VjZmZhMyIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIHN0cm9rZS1saW5lY2FwPSJidXR0Ii8+PC9nPjwvZz48L2c+PC9zdmc+';
+		this.runtime = runtime;
+		this.end_hat = 0;
+		this.audio_player = new Audio();
+		this.set_volume = 1;
+		this.version_number = '1.2.1';
+    }
+
+    getInfo () {
+        return {
+            "id": 'scratchify',
+            "name": 'Scratchify',
+			"blockIconURI": this.icon,
+			"menuIconURI": this.menuicon,
+            "blocks": [
+					{
+                	"opcode": 'playAudioFromURL',
+                    "blockType": "command",
+                    "text": 'play audio [URL]',
+					"arguments": {
+						"URL": {
+							"type": "string",
+							"defaultValue": 'https://dev.meower.org/bgm/2.mp3',
+						},
+					},
+                },
+					{
+                	"opcode": 'stopAudio',
+                    "blockType": "command",
+                    "text": 'stop audio',
+                },
+					{
+                	"opcode": 'pauseAudio',
+                    "blockType": "command",
+                    "text": 'pause',
+                },
+					{
+                	"opcode": 'resumeAudio',
+                    "blockType": "command",
+                    "text": 'resume',
+                },
+					{
+					"opcode": 'goToLocation',
+                    "blockType": "command",
+                    "text": 'go to location [LOCATION]',
+					"arguments": {
+						"LOCATION": {
+							"type": "number",
+							"defaultValue": '0',
+						},
+					},
+                },
+					{
+					"opcode": 'setAudioVolume',
+                    "blockType": "command",
+                    "text": 'set volume [VOLUME]',
+					"arguments": {
+						"VOLUME": {
+							"type": "number",
+							"defaultValue": '100',
+						},
+					},
+                },
+					{
+					"opcode": 'setPlaybackSpeed',
+					"blockType": "command",
+					"text": 'set playback speed [SPEED]',
+					"arguments": {
+						"SPEED": {
+							"type": "number",
+							"defaultValue": '1',
+						},
+					},
+				},
+				{
+                	"opcode": 'enableLoop',
+                    "blockType": "command",
+                    "text": 'turn loop on',
+                },
+		    		{
+                	"opcode": 'disableLoop',
+                    "blockType": "command",
+                    "text": 'turn loop off',
+                },
+		    		{
+                	"opcode": 'audioLocation',
+                    "blockType": "reporter",
+                    "text": 'audio location',
+                },
+		    		{
+                	"opcode": 'audioDuration',
+                    "blockType": "reporter",
+                    "text": 'audio duration',
+                },
+		    		{
+                	"opcode": 'audioVolume',
+                    "blockType": "reporter",
+                    "text": 'audio volume',
+                },
+					{
+					"opcode": 'audioSpeed',
+					"blockType": "reporter",
+					"text": 'audio speed',
+				},
+					{
+					"opcode": 'audioSource',
+					"blockType": "reporter",
+					"text": 'audio url',
+				},
+		    		{
+                	"opcode": 'audioPaused',
+                    "blockType": "Boolean",
+                    "text": 'audio paused?',
+                },
+		    		{
+                	"opcode": 'audioEnded',
+                    "blockType": "Boolean",
+                    "text": 'audio ended?',
+                },
+					{
+					"opcode": 'audioBuffering',
+					"blockType": "Boolean",
+					"text": 'audio buffering?',
+				},
+		    		{
+                	"opcode": 'loopEnabled',
+                    "blockType": "Boolean",
+                    "text": 'loop enabled?',
+                },
+					{
+                	"opcode": 'whenAudioEnds',
+                    "blockType": "hat",
+                    "text": 'when audio ends',
+                },
+					{
+                	"opcode": 'versionNumber',
+                    "blockType": "reporter",
+                    "text": 'extension version',
+                },
+			]
+        };
+    };
+
+	playAudioFromURL({URL}) {
+		this.audio_player = new Audio(URL);
+		this.audio_player.play();
+		this.audio_player.volume = this.set_volume
+		this.end_hat = 1;
+	};
+
+	stopAudio({}) {
+		this.audio_player.pause();
+		this.audio_player.currentTime = 0;
+	};
+
+	pauseAudio({}) {
+		this.audio_player.pause();
+	};
+
+	resumeAudio({}) {
+		this.audio_player.play();
+	};
+
+	goToLocation({LOCATION}) {
+		this.audio_player.currentTime = LOCATION;
+	};
+
+	setAudioVolume({VOLUME}) {
+		if (VOLUME >= 0 && VOLUME <= 100) {
+ 			this.audio_player.volume = VOLUME / 100;
+			this.set_volume = VOLUME / 100;
+		};
+	};
+
+	setPlaybackSpeed({SPEED}) {
+		this.audio_player.playbackRate = SPEED;
+	}
+
+	enableLoop({}) {
+		this.audio_player.loop = true;
+	};
+	
+	disableLoop({}) {
+		this.audio_player.loop = false;
+	};
+
+	audioLocation({}) {
+		return this.audio_player.currentTime;
+	};
+
+	audioDuration({}) {
+		return this.audio_player.duration;
+	};
+
+	audioVolume({}) {
+		return this.audio_player.volume * 100;
+	};
+
+	audioSpeed({}) {
+		return this.audio_player.playbackRate;
+	};
+
+	audioSource({}) {
+		return this.audio_player.src;
+	};
+
+	audioPaused({}) {
+		return this.audio_player.paused;
+	};
+
+	audioEnded({}) {
+		return this.audio_player.ended;
+	};
+
+	audioBuffering({}) {
+		return this.audio_player.buffered;
+	};
+
+	loopEnabled({}) {
+		return this.audio_player.loop;
+	};
+
+	whenAudioEnds() {
+		if (this.end_hat == 1 && this.audio_player.ended) {
+			this.end_hat = 0;
+			return true;
+		} else {
+			return false;
+		};
+	};
+
+	versionNumber({}) {
+		return this.version_number;
+	};
+};
+
+(function() {
+    var extensionClass = ScratchifyExtension;
+    if (typeof window === "undefined" || !window.vm) {
+        Scratch.extensions.register(new extensionClass());
+		console.log("Sandboxed mode detected, performance will suffer because of the extension being sandboxed.");
+    } else {
+        var extensionInstance = new extensionClass(window.vm.extensionManager.runtime);
+        var serviceName = window.vm.extensionManager._registerInternalExtension(extensionInstance);
+        window.vm.extensionManager._loadedExtensions.set(extensionInstance.getInfo().id, serviceName);
+		console.log("Unsandboxed mode detected. Good.");
+    };
+})()
+
+    } catch (e) {
+      handleError(e);
+    }
+  </script>
+  
+    <script>
+      const getProjectData = (function() {
+        const storage = scaffolding.storage;
+        storage.onprogress = (total, loaded) => {
+          setProgress(interpolate(0.2, 0.98, loaded / total));
+        };
+        
+        storage.addWebStore(
+          [storage.AssetType.ImageVector, storage.AssetType.ImageBitmap, storage.AssetType.Sound],
+          (asset) => new URL('./assets/' + asset.assetId + '.' + asset.dataFormat, location).href
+        );
+        return () => new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = () => {
+          resolve(xhr.response);
+        };
+        xhr.onerror = () => {
+          if (location.protocol === 'file:') {
+            reject(new Error('Zip environment must be used from a website, not from a file URL.'));
+          } else {
+            reject(new Error('Request to load project data failed.'));
+          }
+        };
+        xhr.onprogress = (e) => {
+          if (e.lengthComputable) {
+            setProgress(interpolate(0.1, 0.2, e.loaded / e.total));
+          }
+        };
+        xhr.responseType = 'arraybuffer';
+        xhr.open('GET', "./assets/project.json");
+        xhr.send();
+      });
+      })();
+    </script>
+  <script>
+    const run = async () => {
+      const projectData = await getProjectData();
+      await scaffolding.loadProject(projectData);
+      setProgress(1);
+      loadingScreen.hidden = true;
+      if (true) {
+        scaffolding.start();
+      } else {
+        launchScreen.hidden = false;
+        launchScreen.addEventListener('click', () => {
+          launchScreen.hidden = true;
+          scaffolding.start();
+        });
+        launchScreen.focus();
+      }
+    };
+    run().catch(handleError);
+  </script>
+</body>
+</html>
