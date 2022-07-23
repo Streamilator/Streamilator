@@ -9,7 +9,7 @@ Logo credited to M.D. on the Meower Media Co. Discord
 Thanks to Touch, for fixing GUI in 0.0.8
 
 
-Thanks to water/bred/catonmeower/Arrow on the Meower Media Co. Discord
+Thanks to Arrow on the Meower Media Co. Discord
 
 
 Thanks to Tnix for working on the mobile client
