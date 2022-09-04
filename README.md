@@ -17,5 +17,4 @@ Thanks to Tnix for working on the mobile client
 
 Thanks to Tnix on the Meower Media Co. Discord
 
-DISCLAIMER:
-This is NOT a Meower Media Co. product, but many people who work on Meower also worked on Scratchify.
+We are now a Meower Media Co. product!
