@@ -1,5 +1,6 @@
 # Streamilator
 Streamilator is a streaming service coded in Scratch 3.0!
+(Don't use the mobile clients, they were NOT made by Tnix)
 ## Credits
 
 
