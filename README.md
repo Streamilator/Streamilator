@@ -1,5 +1,7 @@
 # Streamilator
 Streamilator is a streaming service coded in Scratch 3.0!
+
+MMC disowned us
 ## Credits
 
 
@@ -17,4 +19,3 @@ Thanks to Tnix for working on the mobile client
 
 Thanks to Tnix on the Meower Media Co. Discord
 
-We are now a Meower Media Co. product!
