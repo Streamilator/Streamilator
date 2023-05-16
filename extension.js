@@ -239,6 +239,7 @@ class ScratchifyExtension {
         var extensionInstance = new extensionClass(window.vm.extensionManager.runtime);
         var serviceName = window.vm.extensionManager._registerInternalExtension(extensionInstance);
         window.vm.extensionManager._loadedExtensions.set(extensionInstance.getInfo().id, serviceName);
+	Scratch.extensions.register(new extensionClass());
 		console.log("Unsandboxed mode detected. Good.");
     };
 })()
